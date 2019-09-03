@@ -1,5 +1,6 @@
 extern crate image;
 extern crate libc;
+extern crate openjpeg_sys;
 
 pub use self::image::{ImageResult, DynamicImage};
 

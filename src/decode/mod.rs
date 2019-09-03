@@ -1,10 +1,10 @@
-use openjp2_sys as ffi;
+use openjpeg_sys as ffi;
 use std::os::raw::c_void;
 use std::ptr::null_mut;
 use std::ffi::CString;
 use image::{DynamicImage, GenericImage};
 
-use error::DecodeError;
+use crate::error::DecodeError;
 
 mod color_convert;
 use self::color_convert::{ColorSpace, ColorSpaceValue};
