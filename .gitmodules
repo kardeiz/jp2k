@@ -1,0 +1,3 @@
+[submodule "openjpeg-sys/libopenjpeg"]
+	path = openjpeg-sys/libopenjpeg
+	url = git@github.com:uclouvain/openjpeg.git

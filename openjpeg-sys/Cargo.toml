@@ -1,0 +1,15 @@
+[package]
+name = "openjpeg-sys"
+version = "0.1.0"
+authors = ["Leo Schwarz <mail@leoschwarz.com>"]
+links = "openjpeg"
+build = "build.rs"
+license = "(MIT OR Apache-2.0) AND BSD-2-CLAUSE"
+
+[dependencies]
+
+[build-dependencies]
+bindgen = "0.51"
+cmake = "0.1.29"
+cc = "1.0"
+
