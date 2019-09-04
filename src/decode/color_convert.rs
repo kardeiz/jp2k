@@ -2,7 +2,6 @@ use image::Rgba;
 
 /// This is the type only describing the actual ColorSpaces and doesn't allow for the `Unknown` and
 /// `Unspecified` variant.
-#[allow(dead_code)] // TODO: remove
 #[derive(Clone, Debug)]
 pub enum ColorSpace {
     CMYK,
@@ -38,18 +37,22 @@ impl ColorSpaceValue {
     }
 }
 
-/// The maximum number of components used in any pixel encoding.
 pub const MAX_COMPONENTS: usize = 4;
-type ArrComponents = [u8; MAX_COMPONENTS];
 
 impl ColorSpace {
-    pub fn convert_to_rgba(&self, source: ArrComponents) -> Rgba<u8> {
-        let result: [u8; 4] = match *self {
+
+    pub fn convert_to_rgba_raw(&self, source: [u8; MAX_COMPONENTS]) -> [u8; MAX_COMPONENTS] {
+        let result = match *self {
             ColorSpace::SRGB => source,
             ColorSpace::GRAY => [source[0], source[0], source[0], 255],
             _ => unimplemented!(),
         };
 
-        Rgba { data: result }
+        result
+    }
+
+
+    pub fn convert_to_rgba(&self, source: [u8; MAX_COMPONENTS]) -> Rgba<u8> {
+        Rgba(self.convert_to_rgba_raw(source))
     }
 }

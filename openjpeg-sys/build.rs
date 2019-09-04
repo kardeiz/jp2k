@@ -37,15 +37,11 @@ fn main() {
 
     let bindings = bindgen::Builder::default()
         .header("wrapper.h")
-        // issue: https://github.com/rust-lang-nursery/rust-bindgen/issues/1120
-        .rustfmt_bindings(false)
         // issue: https://github.com/rust-lang-nursery/rust-bindgen/issues/348
         .clang_arg("-fno-inline-functions")
         .clang_arg(format!("-I{}", include_dir.display()))
         .generate()
         .unwrap();
-
-
 
     // Write bindings to $OUT_DIR/bindings.rs
     bindings
