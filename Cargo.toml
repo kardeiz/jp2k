@@ -8,5 +8,8 @@ edition = "2018"
 [dependencies]
 image = "0.22"
 libc = "0.2"
-openjpeg-sys = { path = "openjpeg-sys", version = "0.1.0" }
 
+[build-dependencies]
+bindgen = "0.51"
+cmake = "0.1.42"
+cc = "1.0"

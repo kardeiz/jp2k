@@ -33,10 +33,9 @@ fn main() {
 
     let out_path = PathBuf::from(env::var("OUT_DIR").unwrap());
     let include_dir = out_path.join("include/openjpeg-2.3");
-    let library_dir = out_path.join("build/bin");
 
     let bindings = bindgen::Builder::default()
-        .header("wrapper.h")
+        .header_contents("wrapper.h", "#include \"openjpeg.h\"")
         .clang_arg("-fno-inline-functions")
         .clang_arg(format!("-I{}", include_dir.display()))
         .generate()

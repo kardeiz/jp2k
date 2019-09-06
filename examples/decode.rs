@@ -33,6 +33,7 @@ fn main() {
         Some(jp2k::decode::DecodeParams { 
             default_colorspace: None, 
             reduce_factor: None, 
+            quality_layers: None,
             decoding_area: Some(jp2k::decode::DecodingArea { x0: 0, y0: 0, x1: 256, y1: 256 })
         })
     ).unwrap();

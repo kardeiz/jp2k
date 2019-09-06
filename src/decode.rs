@@ -1,81 +1,57 @@
-use openjpeg_sys as ffi;
+use crate::{
+    err::Error,
+    ffi,
+    Codec, ColorSpace, ColorSpaceValue, MAX_COMPONENTS, Info,
+};
+
 use std::os::raw::c_void;
 use std::ptr::null_mut;
 use std::ffi::CString;
 use image::DynamicImage;
 
-use crate::error::Error;
-
-mod color_convert;
-
-use self::color_convert::ColorSpaceValue;
-pub use self::color_convert::ColorSpace;
-
-#[derive(Clone, Eq, PartialEq, Debug)]
-pub enum Codec {
-    J2K,
-    JP2,
-    JPP,
-    JPT,
-    JPX,
-}
-
 #[derive(Debug, Clone, Default)]
-pub struct Info {
-    pub width: u32,
-    pub height: u32,
-}
-
-#[derive(Debug, Clone, Default)]
-pub struct DecodingArea {
-    pub x0: i32,
-    pub y0: i32,
-    pub x1: i32,
-    pub y1: i32,
+struct DecodingArea {
+    x0: i32,
+    y0: i32,
+    x1: i32,
+    y1: i32,
 }
 
 #[derive(Debug, Clone, Default)]
 pub struct DecodeParams {
-    pub default_colorspace: Option<ColorSpace>,
-    pub reduce_factor: Option<u32>,
-    pub decoding_area: Option<DecodingArea>,
-    pub quality_layers: Option<u32>,
+    default_color_space: Option<ColorSpace>,
+    reduce_factor: Option<u32>,
+    decoding_area: Option<DecodingArea>,
+    quality_layers: Option<u32>,
 }
 
 impl DecodeParams {
+
+    pub fn with_default_colorspace(mut self, color_space: ColorSpace) -> Self {
+        self.default_color_space = Some(color_space);
+        self
+    }
+
+    pub fn with_reduce_factor(mut self, reduce_factor: u32) -> Self {
+        self.reduce_factor = Some(reduce_factor);
+        self
+    }   
+
+    pub fn with_decoding_area(mut self, x0: i32, y0: i32, x1: i32, y1: i32) -> Self {
+        self.decoding_area = Some(DecodingArea { x0, y0, x1, y1 });
+        self
+    }
+
+    pub fn with_quality_layers(mut self, quality_layers: u32) -> Self {
+        self.quality_layers = Some(quality_layers);
+        self
+    }
+
     fn value_for_discard_level(u: u32, discard_level: u32) -> u32 {
         let div = 1 << discard_level;
         let quot = u / div;
         let rem = u % div;
         if rem > 0 { quot + 1 } else { quot }        
-    }
-}
-
-impl Codec {
-    fn to_i32(&self) -> i32 {
-        match *self {
-            Codec::J2K => ffi::CODEC_FORMAT_OPJ_CODEC_J2K,
-            Codec::JP2 => ffi::CODEC_FORMAT_OPJ_CODEC_JP2,
-            Codec::JPP => ffi::CODEC_FORMAT_OPJ_CODEC_JPP,
-            Codec::JPT => ffi::CODEC_FORMAT_OPJ_CODEC_JPT,
-            Codec::JPX => ffi::CODEC_FORMAT_OPJ_CODEC_JPX,
-        }
-    }
-}
-
-
-impl ColorSpaceValue {
-    fn from_i32(val: i32) -> Self {
-        match val {
-            ffi::COLOR_SPACE_OPJ_CLRSPC_CMYK => ColorSpaceValue::CMYK,
-            ffi::COLOR_SPACE_OPJ_CLRSPC_EYCC => ColorSpaceValue::EYCC,
-            ffi::COLOR_SPACE_OPJ_CLRSPC_GRAY => ColorSpaceValue::GRAY,
-            ffi::COLOR_SPACE_OPJ_CLRSPC_SRGB => ColorSpaceValue::SRGB,
-            ffi::COLOR_SPACE_OPJ_CLRSPC_SYCC => ColorSpaceValue::SYCC,
-            ffi::COLOR_SPACE_OPJ_CLRSPC_UNKNOWN => ColorSpaceValue::Unknown(val),
-            ffi::COLOR_SPACE_OPJ_CLRSPC_UNSPECIFIED => ColorSpaceValue::Unspecified,
-            _ => ColorSpaceValue::Unknown(val),
-        }
     }
 }
 
@@ -154,7 +130,7 @@ unsafe fn load_from_stream(
     ffi::opj_stream_destroy(jp2_stream);
 
     let color_space_raw = ColorSpaceValue::from_i32((*jp2_image).color_space);
-    let color_space = color_space_raw.determined().or(params.default_colorspace);
+    let color_space = color_space_raw.determined().or(params.default_color_space);
     
     let color_space = if let Some(color_space) = color_space {
         color_space
@@ -177,7 +153,7 @@ unsafe fn load_from_stream(
         comps.push((*jp2_image).comps.offset(i as isize));
     }
 
-    if comps.len() > color_convert::MAX_COMPONENTS {
+    if comps.len() > MAX_COMPONENTS {
         ffi::opj_destroy_codec(jp2_codec);
         ffi::opj_image_destroy(jp2_image);
         return Err(Error::TooManyComponents(comps.len()));
@@ -198,7 +174,7 @@ unsafe fn load_from_stream(
                 let ivalue: u8 = *data.offset(index) as u8;
                 values[i] = ivalue;
             }
-            std::io::Write::write_all(&mut container, &color_space.convert_to_rgba_raw(values))?;
+            std::io::Write::write_all(&mut container, &color_space.convert_to_rgba(values))?;
         }
     }
 
@@ -253,8 +229,6 @@ unsafe fn info_from_stream(
     Ok(Info { width, height })
 }
 
-
-
 pub fn load_from_memory(
     buf: &[u8],
     codec: Codec,
@@ -305,20 +279,6 @@ pub fn load_from_memory(
     }
 }
 
-/*
-// TODO: Apparently this is still missing https://github.com/uclouvain/openjpeg/issues/972
-pub fn load_from_memory(buf: &mut [u8], codec: Codec) -> Result<DynamicImage, Error> {
-    unsafe {
-        let jp2_stream = ffi::opj_stream_create(buf.len(), 1);
-        //ffi::opj_stream_set_user_data_length(jp2_stream, buf.len() as u64);
-        ffi::opj_stream_set_user_data(jp2_stream, buf.as_mut_ptr() as *mut c_void, None);
-        ffi::opj_stream_set_read_function(jp2_stream, Some(full_read_buf));
-        load_from_stream(jp2_stream, codec)
-    }
-}
-*/
-
-// TODO: docs
 pub fn load_from_file<T: Into<Vec<u8>>>(file_name: T, codec: Codec, decode_params: Option<DecodeParams>) -> Result<DynamicImage, Error> {
     let decode_params = decode_params.unwrap_or_default();
     let file_name = CString::new(file_name.into())?;
