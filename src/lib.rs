@@ -2,7 +2,7 @@
 
 # Rust bindings to OpenJPEG
 
-Supports loading JPEG2000 images into `image::DynamicImage`.Rust
+Supports loading JPEG2000 images into `image::DynamicImage`.
 
 Forked from https://framagit.org/leoschwarz/jpeg2000-rust before its GPL-v3 relicensing, with some additional features:
 
