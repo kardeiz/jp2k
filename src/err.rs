@@ -16,25 +16,45 @@ pub enum Error {
 }
 
 impl From<std::ffi::NulError> for Error {
-    fn from(t: std::ffi::NulError) -> Self { Self::NulError(t) }
+    fn from(t: std::ffi::NulError) -> Self {
+        Self::NulError(t)
+    }
 }
 
 impl From<std::io::Error> for Error {
-    fn from(t: std::io::Error) -> Self { Self::Io(t) }
+    fn from(t: std::io::Error) -> Self {
+        Self::Io(t)
+    }
 }
 
 impl std::fmt::Display for Error {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         use Error::*;
         match self {
-            FfiError(ref s) => { write!(f, "FFI: {}", s)?; },
-            ReadHeader => { write!(f, "Reading the header failed for some reason")?; },
-            TooManyComponents(u) => { write!(f, "There were too many components ({}) in the supplied file", u)?; },
-            UnspecifiedColorSpace => { write!(f, "Unspecified color space")?; },
-            UnknownColorSpace => { write!(f, "Unknown color space")?; },
-            NulError(ref e) => { write!(f, "{}", e)?; },
-            Io(ref e) => { write!(f, "{}", e)?; },
-            ImageContainerTooSmall => { write!(f, "Image container is too small")?; },
+            FfiError(ref s) => {
+                write!(f, "FFI: {}", s)?;
+            }
+            ReadHeader => {
+                write!(f, "Reading the header failed for some reason")?;
+            }
+            TooManyComponents(u) => {
+                write!(f, "There were too many components ({}) in the supplied file", u)?;
+            }
+            UnspecifiedColorSpace => {
+                write!(f, "Unspecified color space")?;
+            }
+            UnknownColorSpace => {
+                write!(f, "Unknown color space")?;
+            }
+            NulError(ref e) => {
+                write!(f, "{}", e)?;
+            }
+            Io(ref e) => {
+                write!(f, "{}", e)?;
+            }
+            ImageContainerTooSmall => {
+                write!(f, "Image container is too small")?;
+            }
         }
 
         Ok(())

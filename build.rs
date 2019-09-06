@@ -1,13 +1,12 @@
 // debugging instructions: run cargo with -vv to get all output.
 
 extern crate bindgen;
-extern crate cmake;
 extern crate cc;
+extern crate cmake;
 
 use std::env;
 use std::path::{Path, PathBuf};
 use std::process::Command;
-
 
 #[cfg(unix)]
 mod supported_platform {
@@ -18,9 +17,7 @@ fn main() {
     supported_platform::check();
 
     if !Path::new("libopenjpeg/.git").exists() {
-        let _ = Command::new("git")
-            .args(&["submodule", "update", "--init"])
-            .status();
+        let _ = Command::new("git").args(&["submodule", "update", "--init"]).status();
     }
 
     // Unset DESTDIR or libopenjp2.a ends up in it and cargo won't find it.
@@ -42,7 +39,5 @@ fn main() {
         .unwrap();
 
     // Write bindings to $OUT_DIR/bindings.rs
-    bindings
-        .write_to_file(out_path.join("bindings.rs"))
-        .unwrap();
+    bindings.write_to_file(out_path.join("bindings.rs")).unwrap();
 }

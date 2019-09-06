@@ -1,13 +1,9 @@
-use crate::{
-    err::Error,
-    ffi,
-    Codec, ColorSpace, ColorSpaceValue, MAX_COMPONENTS, Info,
-};
+use crate::{err::Error, ffi, Codec, ColorSpace, ColorSpaceValue, Info, MAX_COMPONENTS};
 
+use image::DynamicImage;
+use std::ffi::CString;
 use std::os::raw::c_void;
 use std::ptr::null_mut;
-use std::ffi::CString;
-use image::DynamicImage;
 
 #[derive(Debug, Clone, Default)]
 struct DecodingArea {
@@ -17,6 +13,7 @@ struct DecodingArea {
     y1: i32,
 }
 
+/// Parameters used to decode JPEG2000 image
 #[derive(Debug, Clone, Default)]
 pub struct DecodeParams {
     default_color_space: Option<ColorSpace>,
@@ -27,21 +24,25 @@ pub struct DecodeParams {
 
 impl DecodeParams {
 
+    /// Used when the library cannot determine color space
     pub fn with_default_colorspace(mut self, color_space: ColorSpace) -> Self {
         self.default_color_space = Some(color_space);
         self
     }
 
+    /// Image will be "scaled" to dim / (2 ^ reduce_factor)
     pub fn with_reduce_factor(mut self, reduce_factor: u32) -> Self {
         self.reduce_factor = Some(reduce_factor);
         self
-    }   
+    }
 
+    /// Image will be "cropped" to the specified decoding area, with width = x1 - x0 and height y1 - y0
     pub fn with_decoding_area(mut self, x0: i32, y0: i32, x1: i32, y1: i32) -> Self {
         self.decoding_area = Some(DecodingArea { x0, y0, x1, y1 });
         self
     }
 
+    /// Will only use the specified number of quality layers
     pub fn with_quality_layers(mut self, quality_layers: u32) -> Self {
         self.quality_layers = Some(quality_layers);
         self
@@ -51,7 +52,11 @@ impl DecodeParams {
         let div = 1 << discard_level;
         let quot = u / div;
         let rem = u % div;
-        if rem > 0 { quot + 1 } else { quot }        
+        if rem > 0 {
+            quot + 1
+        } else {
+            quot
+        }
     }
 }
 
@@ -91,9 +96,9 @@ unsafe fn load_from_stream(
         ffi::opj_stream_destroy(jp2_stream);
         return Err(Error::FfiError("Codec instantiation failed."));
     }
-    
+
     let mut jp2_dparams = get_default_decoder_parameters();
-    
+
     if let Some(reduce_factor) = params.reduce_factor {
         jp2_dparams.cp_reduce = reduce_factor;
     }
@@ -131,7 +136,7 @@ unsafe fn load_from_stream(
 
     let color_space_raw = ColorSpaceValue::from_i32((*jp2_image).color_space);
     let color_space = color_space_raw.determined().or(params.default_color_space);
-    
+
     let color_space = if let Some(color_space) = color_space {
         color_space
     } else {
@@ -158,7 +163,7 @@ unsafe fn load_from_stream(
         ffi::opj_image_destroy(jp2_image);
         return Err(Error::TooManyComponents(comps.len()));
     }
-    
+
     let factor = (*comps[0]).factor;
     let width = DecodeParams::value_for_discard_level(width, factor);
     let height = DecodeParams::value_for_discard_level(height, factor);
@@ -182,28 +187,25 @@ unsafe fn load_from_stream(
         .ok_or_else(|| Error::ImageContainerTooSmall)?;
 
     let image = DynamicImage::ImageRgba8(buffer);
-    
+
     ffi::opj_destroy_codec(jp2_codec);
     ffi::opj_image_destroy(jp2_image);
 
     Ok(image)
 }
 
-unsafe fn info_from_stream(
-    jp2_stream: *mut *mut c_void,
-    codec: Codec,
-) -> Result<Info, Error> {
+unsafe fn info_from_stream(jp2_stream: *mut *mut c_void, codec: Codec) -> Result<Info, Error> {
     // Setup the decoder.
     let jp2_codec = ffi::opj_create_decompress(codec.to_i32());
     if jp2_codec.is_null() {
         ffi::opj_stream_destroy(jp2_stream);
         return Err(Error::FfiError("Codec instantiation failed."));
     }
-    
+
     let mut jp2_dparams = get_default_decoder_parameters();
-    
+
     jp2_dparams.flags |= ffi::OPJ_DPARAMETERS_DUMP_FLAG;
-    
+
     if ffi::opj_setup_decoder(jp2_codec, &mut jp2_dparams) != 1 {
         ffi::opj_stream_destroy(jp2_stream);
         ffi::opj_destroy_codec(jp2_codec);
@@ -229,69 +231,85 @@ unsafe fn info_from_stream(
     Ok(Info { width, height })
 }
 
-pub fn load_from_memory(
+struct SliceWithOffset<'a> {
+    buf: &'a [u8],
+    offset: usize,
+}
+
+unsafe extern "C" fn opj_stream_read_fn(
+    p_buffer: *mut std::os::raw::c_void,
+    p_nb_bytes: usize,
+    p_user_data: *mut std::os::raw::c_void,
+) -> usize {
+    if p_buffer.is_null() {
+        return 0;
+    }
+
+    let user_data = p_user_data as *mut SliceWithOffset;
+
+    let len = (&*user_data).buf.len();
+
+    let offset = (&*user_data).offset;
+
+    let bytes_left = len - offset;
+
+    let bytes_read = std::cmp::min(bytes_left, p_nb_bytes);
+
+    let slice = &(&*user_data).buf[offset..offset + bytes_read];
+
+    std::ptr::copy_nonoverlapping(slice.as_ptr(), p_buffer as *mut u8, bytes_read);
+
+    (*user_data).offset += bytes_read;
+
+    bytes_read
+}
+
+pub fn load_from_bytes(
     buf: &[u8],
     codec: Codec,
     decode_params: Option<DecodeParams>,
 ) -> Result<DynamicImage, Error> {
     
-    struct SliceWithOffset<'a> {
-        buf: &'a [u8],
-        offset: usize,
-    }
-
-    unsafe extern "C" fn opj_stream_read_fn(
-        p_buffer: *mut std::os::raw::c_void,
-        p_nb_bytes: usize,
-        p_user_data: *mut std::os::raw::c_void,
-    ) -> usize {
-
-        if p_buffer.is_null() { return 0; }
-        
-        let user_data = p_user_data as *mut SliceWithOffset;
-
-        let len = (&*user_data).buf.len();
-
-        let offset = (&*user_data).offset;
-
-        let bytes_left = len - offset;
-
-        let bytes_read = std::cmp::min(bytes_left, p_nb_bytes);
-
-        let slice = &(&*user_data).buf[offset..offset + bytes_read];
-
-        std::ptr::copy_nonoverlapping(slice.as_ptr(), p_buffer as *mut u8, bytes_read);
-
-        (*user_data).offset += bytes_read;
-
-        bytes_read
-    }
-
     let decode_params = decode_params.unwrap_or_default();
 
     unsafe {
         let user_data: *mut SliceWithOffset = &mut SliceWithOffset { buf, offset: 0 };
-        let stream = ffi::opj_stream_default_create(1);
-        ffi::opj_stream_set_read_function(stream, Some(opj_stream_read_fn));
-        ffi::opj_stream_set_user_data_length(stream, buf.len() as u64);
-        ffi::opj_stream_set_user_data(stream, user_data as *mut c_void, None);
-        load_from_stream(stream, codec, decode_params)
+        let jp2_stream = ffi::opj_stream_default_create(1);
+        ffi::opj_stream_set_read_function(jp2_stream, Some(opj_stream_read_fn));
+        ffi::opj_stream_set_user_data_length(jp2_stream, buf.len() as u64);
+        ffi::opj_stream_set_user_data(jp2_stream, user_data as *mut c_void, None);
+        load_from_stream(jp2_stream, codec, decode_params)
     }
 }
 
-pub fn load_from_file<T: Into<Vec<u8>>>(file_name: T, codec: Codec, decode_params: Option<DecodeParams>) -> Result<DynamicImage, Error> {
+pub fn load_from_file<T: Into<Vec<u8>>>(
+    file_name: T,
+    codec: Codec,
+    decode_params: Option<DecodeParams>,
+) -> Result<DynamicImage, Error> {
     let decode_params = decode_params.unwrap_or_default();
-    let file_name = CString::new(file_name.into())?;
+    let file_name = CString::new(file_name)?;
     unsafe {
         let jp2_stream = ffi::opj_stream_create_default_file_stream(file_name.as_ptr(), 1);
         load_from_stream(jp2_stream, codec, decode_params)
     }
 }
 
-pub fn info<T: Into<Vec<u8>>>(file_name: T, codec: Codec) -> Result<Info, Error> {
-    let file_name = CString::new(file_name.into())?;
+pub fn info_from_file<T: Into<Vec<u8>>>(file_name: T, codec: Codec) -> Result<Info, Error> {
+    let file_name = CString::new(file_name)?;
     unsafe {
         let jp2_stream = ffi::opj_stream_create_default_file_stream(file_name.as_ptr(), 1);
+        info_from_stream(jp2_stream, codec)
+    }
+}
+
+pub fn info_from_bytes(buf: &[u8], codec: Codec) -> Result<Info, Error> {
+    unsafe {
+        let user_data: *mut SliceWithOffset = &mut SliceWithOffset { buf, offset: 0 };
+        let jp2_stream = ffi::opj_stream_default_create(1);
+        ffi::opj_stream_set_read_function(jp2_stream, Some(opj_stream_read_fn));
+        ffi::opj_stream_set_user_data_length(jp2_stream, buf.len() as u64);
+        ffi::opj_stream_set_user_data(jp2_stream, user_data as *mut c_void, None);
         info_from_stream(jp2_stream, codec)
     }
 }
