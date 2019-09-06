@@ -4,6 +4,11 @@ version = "0.1.0"
 authors = ["Jacob Brown <kardeiz@gmail.com>", "Leo Schwarz <mail@leoschwarz.com>"]
 license = "MIT OR Apache-2.0"
 edition = "2018"
+categories = ["multimedia::images"]
+description = "Interface to load JPEG200 images into image"
+keywords = ["jpeg2000", "jp2", "jp2k", "openjpeg"]
+readme = "README.md"
+repository = "https://github.com/kardeiz/jp2k"
 
 [dependencies]
 image = "0.22"
