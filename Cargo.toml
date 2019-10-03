@@ -20,4 +20,4 @@ cmake = "0.1.42"
 cc = "1.0"
 
 [dev-dependencies]
-rips = { path = "../rips" }
+rips = "0.2"
