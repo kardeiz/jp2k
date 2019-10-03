@@ -16,6 +16,7 @@ mod supported_platform {
 fn main() {
     supported_platform::check();
 
+
     if !Path::new("libopenjpeg/.git").exists() {
         let _ = Command::new("git").args(&["submodule", "update", "--init"]).status();
     }
@@ -27,6 +28,8 @@ fn main() {
 
     println!("cargo:rustc-link-search=native={}/build/bin", dst.display());
     println!("cargo:rustc-link-lib=static=openjp2");
+    
+    // if Path::new("src/ffi.ref.rs").exists() { return; }
 
     let out_path = PathBuf::from(env::var("OUT_DIR").unwrap());
     let include_dir = out_path.join("include/openjpeg-2.3");
@@ -35,8 +38,14 @@ fn main() {
         .header_contents("wrapper.h", "#include \"openjpeg.h\"")
         .clang_arg("-fno-inline-functions")
         .clang_arg(format!("-I{}", include_dir.display()))
+        .derive_debug(true)
+        .impl_debug(true)
+        .default_enum_style(bindgen::EnumVariation::Rust { non_exhaustive: false })
+        .rustfmt_bindings(true)
         .generate()
         .unwrap();
+
+    bindings.write_to_file("src/ffi.ref.rs").unwrap();
 
     // Write bindings to $OUT_DIR/bindings.rs
     bindings.write_to_file(out_path.join("bindings.rs")).unwrap();

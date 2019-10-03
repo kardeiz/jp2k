@@ -375,6 +375,11 @@ fn bindgen_test_layout___mbstate_t__bindgen_ty_1() {
         )
     );
 }
+impl ::std::fmt::Debug for __mbstate_t__bindgen_ty_1 {
+    fn fmt(&self, f: &mut ::std::fmt::Formatter<'_>) -> ::std::fmt::Result {
+        write!(f, "__mbstate_t__bindgen_ty_1 {{ union }}")
+    }
+}
 #[test]
 fn bindgen_test_layout___mbstate_t() {
     assert_eq!(
@@ -397,6 +402,11 @@ fn bindgen_test_layout___mbstate_t() {
         4usize,
         concat!("Offset of field: ", stringify!(__mbstate_t), "::", stringify!(__value))
     );
+}
+impl ::std::fmt::Debug for __mbstate_t {
+    fn fmt(&self, f: &mut ::std::fmt::Formatter<'_>) -> ::std::fmt::Result {
+        write!(f, "__mbstate_t {{ __count: {:?}, __value: {:?} }}", self.__count, self.__value)
+    }
 }
 #[repr(C)]
 #[derive(Copy, Clone)]
@@ -427,6 +437,11 @@ fn bindgen_test_layout__G_fpos_t() {
         concat!("Offset of field: ", stringify!(_G_fpos_t), "::", stringify!(__state))
     );
 }
+impl ::std::fmt::Debug for _G_fpos_t {
+    fn fmt(&self, f: &mut ::std::fmt::Formatter<'_>) -> ::std::fmt::Result {
+        write!(f, "_G_fpos_t {{ __pos: {:?}, __state: {:?} }}", self.__pos, self.__state)
+    }
+}
 #[repr(C)]
 #[derive(Copy, Clone)]
 pub struct _G_fpos64_t {
@@ -455,6 +470,11 @@ fn bindgen_test_layout__G_fpos64_t() {
         8usize,
         concat!("Offset of field: ", stringify!(_G_fpos64_t), "::", stringify!(__state))
     );
+}
+impl ::std::fmt::Debug for _G_fpos64_t {
+    fn fmt(&self, f: &mut ::std::fmt::Formatter<'_>) -> ::std::fmt::Result {
+        write!(f, "_G_fpos64_t {{ __pos: {:?}, __state: {:?} }}", self.__pos, self.__state)
+    }
 }
 pub type va_list = __builtin_va_list;
 pub type __gnuc_va_list = __builtin_va_list;
@@ -499,11 +519,14 @@ fn bindgen_test_layout__IO_marker() {
         concat!("Offset of field: ", stringify!(_IO_marker), "::", stringify!(_pos))
     );
 }
-pub const __codecvt_result___codecvt_ok: __codecvt_result = 0;
-pub const __codecvt_result___codecvt_partial: __codecvt_result = 1;
-pub const __codecvt_result___codecvt_error: __codecvt_result = 2;
-pub const __codecvt_result___codecvt_noconv: __codecvt_result = 3;
-pub type __codecvt_result = u32;
+#[repr(u32)]
+#[derive(Debug, Copy, Clone, PartialEq, Eq, Hash)]
+pub enum __codecvt_result {
+    __codecvt_ok = 0,
+    __codecvt_partial = 1,
+    __codecvt_error = 2,
+    __codecvt_noconv = 3,
+}
 #[repr(C)]
 #[derive(Debug, Copy, Clone)]
 pub struct _IO_FILE {
@@ -1250,74 +1273,89 @@ extern "C" {
     pub fn funlockfile(__stream: *mut FILE);
 }
 pub type OPJ_SIZE_T = usize;
-pub const RSIZ_CAPABILITIES_OPJ_STD_RSIZ: RSIZ_CAPABILITIES = 0;
-#[doc = " Standard JPEG2000 profile"]
-pub const RSIZ_CAPABILITIES_OPJ_CINEMA2K: RSIZ_CAPABILITIES = 3;
-#[doc = " Profile name for a 2K image"]
-pub const RSIZ_CAPABILITIES_OPJ_CINEMA4K: RSIZ_CAPABILITIES = 4;
-#[doc = " Profile name for a 4K image"]
-pub const RSIZ_CAPABILITIES_OPJ_MCT: RSIZ_CAPABILITIES = 33024;
+#[repr(u32)]
 #[doc = " DEPRECATED: use RSIZ, OPJ_PROFILE_* and OPJ_EXTENSION_* instead"]
 #[doc = " Rsiz Capabilities"]
-pub type RSIZ_CAPABILITIES = u32;
+#[derive(Debug, Copy, Clone, PartialEq, Eq, Hash)]
+pub enum RSIZ_CAPABILITIES {
+    OPJ_STD_RSIZ = 0,
+    #[doc = " Standard JPEG2000 profile"]
+    OPJ_CINEMA2K = 3,
+    #[doc = " Profile name for a 2K image"]
+    OPJ_CINEMA4K = 4,
+    #[doc = " Profile name for a 4K image"]
+    OPJ_MCT = 33024,
+}
 pub use self::RSIZ_CAPABILITIES as OPJ_RSIZ_CAPABILITIES;
-pub const CINEMA_MODE_OPJ_OFF: CINEMA_MODE = 0;
-#[doc = " Not Digital Cinema"]
-pub const CINEMA_MODE_OPJ_CINEMA2K_24: CINEMA_MODE = 1;
-#[doc = " 2K Digital Cinema at 24 fps"]
-pub const CINEMA_MODE_OPJ_CINEMA2K_48: CINEMA_MODE = 2;
-#[doc = " 2K Digital Cinema at 48 fps"]
-pub const CINEMA_MODE_OPJ_CINEMA4K_24: CINEMA_MODE = 3;
+#[repr(u32)]
 #[doc = " DEPRECATED: use RSIZ, OPJ_PROFILE_* and OPJ_EXTENSION_* instead"]
 #[doc = " Digital cinema operation mode"]
-pub type CINEMA_MODE = u32;
+#[derive(Debug, Copy, Clone, PartialEq, Eq, Hash)]
+pub enum CINEMA_MODE {
+    OPJ_OFF = 0,
+    #[doc = " Not Digital Cinema"]
+    OPJ_CINEMA2K_24 = 1,
+    #[doc = " 2K Digital Cinema at 24 fps"]
+    OPJ_CINEMA2K_48 = 2,
+    #[doc = " 2K Digital Cinema at 48 fps"]
+    OPJ_CINEMA4K_24 = 3,
+}
 pub use self::CINEMA_MODE as OPJ_CINEMA_MODE;
-#[doc = "< place-holder"]
-pub const PROG_ORDER_OPJ_PROG_UNKNOWN: PROG_ORDER = -1;
-#[doc = "< layer-resolution-component-precinct order"]
-pub const PROG_ORDER_OPJ_LRCP: PROG_ORDER = 0;
-#[doc = "< resolution-layer-component-precinct order"]
-pub const PROG_ORDER_OPJ_RLCP: PROG_ORDER = 1;
-#[doc = "< resolution-precinct-component-layer order"]
-pub const PROG_ORDER_OPJ_RPCL: PROG_ORDER = 2;
-#[doc = "< precinct-component-resolution-layer order"]
-pub const PROG_ORDER_OPJ_PCRL: PROG_ORDER = 3;
-#[doc = "< component-precinct-resolution-layer order"]
-pub const PROG_ORDER_OPJ_CPRL: PROG_ORDER = 4;
+#[repr(i32)]
 #[doc = " Progression order"]
-pub type PROG_ORDER = i32;
+#[derive(Debug, Copy, Clone, PartialEq, Eq, Hash)]
+pub enum PROG_ORDER {
+    #[doc = "< place-holder"]
+    OPJ_PROG_UNKNOWN = -1,
+    #[doc = "< layer-resolution-component-precinct order"]
+    OPJ_LRCP = 0,
+    #[doc = "< resolution-layer-component-precinct order"]
+    OPJ_RLCP = 1,
+    #[doc = "< resolution-precinct-component-layer order"]
+    OPJ_RPCL = 2,
+    #[doc = "< precinct-component-resolution-layer order"]
+    OPJ_PCRL = 3,
+    #[doc = "< component-precinct-resolution-layer order"]
+    OPJ_CPRL = 4,
+}
 pub use self::PROG_ORDER as OPJ_PROG_ORDER;
-#[doc = "< not supported by the library"]
-pub const COLOR_SPACE_OPJ_CLRSPC_UNKNOWN: COLOR_SPACE = -1;
-#[doc = "< not specified in the codestream"]
-pub const COLOR_SPACE_OPJ_CLRSPC_UNSPECIFIED: COLOR_SPACE = 0;
-#[doc = "< sRGB"]
-pub const COLOR_SPACE_OPJ_CLRSPC_SRGB: COLOR_SPACE = 1;
-#[doc = "< grayscale"]
-pub const COLOR_SPACE_OPJ_CLRSPC_GRAY: COLOR_SPACE = 2;
-#[doc = "< YUV"]
-pub const COLOR_SPACE_OPJ_CLRSPC_SYCC: COLOR_SPACE = 3;
-#[doc = "< e-YCC"]
-pub const COLOR_SPACE_OPJ_CLRSPC_EYCC: COLOR_SPACE = 4;
-#[doc = "< CMYK"]
-pub const COLOR_SPACE_OPJ_CLRSPC_CMYK: COLOR_SPACE = 5;
+#[repr(i32)]
 #[doc = " Supported image color spaces"]
-pub type COLOR_SPACE = i32;
+#[derive(Debug, Copy, Clone, PartialEq, Eq, Hash)]
+pub enum COLOR_SPACE {
+    #[doc = "< not supported by the library"]
+    OPJ_CLRSPC_UNKNOWN = -1,
+    #[doc = "< not specified in the codestream"]
+    OPJ_CLRSPC_UNSPECIFIED = 0,
+    #[doc = "< sRGB"]
+    OPJ_CLRSPC_SRGB = 1,
+    #[doc = "< grayscale"]
+    OPJ_CLRSPC_GRAY = 2,
+    #[doc = "< YUV"]
+    OPJ_CLRSPC_SYCC = 3,
+    #[doc = "< e-YCC"]
+    OPJ_CLRSPC_EYCC = 4,
+    #[doc = "< CMYK"]
+    OPJ_CLRSPC_CMYK = 5,
+}
 pub use self::COLOR_SPACE as OPJ_COLOR_SPACE;
-#[doc = "< place-holder"]
-pub const CODEC_FORMAT_OPJ_CODEC_UNKNOWN: CODEC_FORMAT = -1;
-#[doc = "< JPEG-2000 codestream : read/write"]
-pub const CODEC_FORMAT_OPJ_CODEC_J2K: CODEC_FORMAT = 0;
-#[doc = "< JPT-stream (JPEG 2000, JPIP) : read only"]
-pub const CODEC_FORMAT_OPJ_CODEC_JPT: CODEC_FORMAT = 1;
-#[doc = "< JP2 file format : read/write"]
-pub const CODEC_FORMAT_OPJ_CODEC_JP2: CODEC_FORMAT = 2;
-#[doc = "< JPP-stream (JPEG 2000, JPIP) : to be coded"]
-pub const CODEC_FORMAT_OPJ_CODEC_JPP: CODEC_FORMAT = 3;
-#[doc = "< JPX file format (JPEG 2000 Part-2) : to be coded"]
-pub const CODEC_FORMAT_OPJ_CODEC_JPX: CODEC_FORMAT = 4;
+#[repr(i32)]
 #[doc = " Supported codec"]
-pub type CODEC_FORMAT = i32;
+#[derive(Debug, Copy, Clone, PartialEq, Eq, Hash)]
+pub enum CODEC_FORMAT {
+    #[doc = "< place-holder"]
+    OPJ_CODEC_UNKNOWN = -1,
+    #[doc = "< JPEG-2000 codestream : read/write"]
+    OPJ_CODEC_J2K = 0,
+    #[doc = "< JPT-stream (JPEG 2000, JPIP) : read only"]
+    OPJ_CODEC_JPT = 1,
+    #[doc = "< JP2 file format : read/write"]
+    OPJ_CODEC_JP2 = 2,
+    #[doc = "< JPP-stream (JPEG 2000, JPIP) : to be coded"]
+    OPJ_CODEC_JPP = 3,
+    #[doc = "< JPX file format (JPEG 2000 Part-2) : to be coded"]
+    OPJ_CODEC_JPX = 4,
+}
 pub use self::CODEC_FORMAT as OPJ_CODEC_FORMAT;
 #[doc = " Callback function prototype for events"]
 #[doc = " @param msg               Event message"]
@@ -2098,6 +2136,11 @@ fn bindgen_test_layout_opj_cparameters() {
         concat!("Offset of field: ", stringify!(opj_cparameters), "::", stringify!(rsiz))
     );
 }
+impl ::std::fmt::Debug for opj_cparameters {
+    fn fmt(&self, f: &mut ::std::fmt::Formatter<'_>) -> ::std::fmt::Result {
+        write ! ( f , "opj_cparameters {{ tile_size_on: {:?}, cp_tx0: {:?}, cp_ty0: {:?}, cp_tdx: {:?}, cp_tdy: {:?}, cp_disto_alloc: {:?}, cp_fixed_alloc: {:?}, cp_fixed_quality: {:?}, cp_matrice: {:?}, cp_comment: {:?}, csty: {:?}, prog_order: {:?}, POC: [{}], numpocs: {:?}, tcp_numlayers: {:?}, tcp_rates: [{}], tcp_distoratio: [{}], numresolution: {:?}, cblockw_init: {:?}, cblockh_init: {:?}, mode: {:?}, irreversible: {:?}, roi_compno: {:?}, roi_shift: {:?}, res_spec: {:?}, prcw_init: [{}], prch_init: [{}], infile: [{}], outfile: [{}], index_on: {:?}, index: [{}], image_offset_x0: {:?}, image_offset_y0: {:?}, subsampling_dx: {:?}, subsampling_dy: {:?}, decod_format: {:?}, cod_format: {:?}, jpwl_epc_on: {:?}, jpwl_hprot_MH: {:?}, jpwl_hprot_TPH_tileno: {:?}, jpwl_hprot_TPH: {:?}, jpwl_pprot_tileno: {:?}, jpwl_pprot_packno: {:?}, jpwl_pprot: {:?}, jpwl_sens_size: {:?}, jpwl_sens_addr: {:?}, jpwl_sens_range: {:?}, jpwl_sens_MH: {:?}, jpwl_sens_TPH_tileno: {:?}, jpwl_sens_TPH: {:?}, cp_cinema: {:?}, max_comp_size: {:?}, cp_rsiz: {:?}, tp_on: {:?}, tp_flag: {:?}, tcp_mct: {:?}, jpip_on: {:?}, mct_data: {:?}, max_cs_size: {:?}, rsiz: {:?} }}" , self . tile_size_on , self . cp_tx0 , self . cp_ty0 , self . cp_tdx , self . cp_tdy , self . cp_disto_alloc , self . cp_fixed_alloc , self . cp_fixed_quality , self . cp_matrice , self . cp_comment , self . csty , self . prog_order , self . POC . iter ( ) . enumerate ( ) . map ( | ( i , v ) | format ! ( "{}{:?}" , if i > 0 { ", " } else { "" } , v ) ) . collect :: < String > ( ) , self . numpocs , self . tcp_numlayers , self . tcp_rates . iter ( ) . enumerate ( ) . map ( | ( i , v ) | format ! ( "{}{:?}" , if i > 0 { ", " } else { "" } , v ) ) . collect :: < String > ( ) , self . tcp_distoratio . iter ( ) . enumerate ( ) . map ( | ( i , v ) | format ! ( "{}{:?}" , if i > 0 { ", " } else { "" } , v ) ) . collect :: < String > ( ) , self . numresolution , self . cblockw_init , self . cblockh_init , self . mode , self . irreversible , self . roi_compno , self . roi_shift , self . res_spec , self . prcw_init . iter ( ) . enumerate ( ) . map ( | ( i , v ) | format ! ( "{}{:?}" , if i > 0 { ", " } else { "" } , v ) ) . collect :: < String > ( ) , self . prch_init . iter ( ) . enumerate ( ) . map ( | ( i , v ) | format ! ( "{}{:?}" , if i > 0 { ", " } else { "" } , v ) ) . collect :: < String > ( ) , self . infile . iter ( ) . enumerate ( ) . map ( | ( i , v ) | format ! ( "{}{:?}" , if i > 0 { ", " } else { "" } , v ) ) . collect :: < String > ( ) , self . outfile . iter ( ) . enumerate ( ) . map ( | ( i , v ) | format ! ( "{}{:?}" , if i > 0 { ", " } else { "" } , v ) ) . collect :: < String > ( ) , self . index_on , self . index . iter ( ) . enumerate ( ) . map ( | ( i , v ) | format ! ( "{}{:?}" , if i > 0 { ", " } else { "" } , v ) ) . collect :: < String > ( ) , self . image_offset_x0 , self . image_offset_y0 , self . subsampling_dx , self . subsampling_dy , self . decod_format , self . cod_format , self . jpwl_epc_on , self . jpwl_hprot_MH , self . jpwl_hprot_TPH_tileno , self . jpwl_hprot_TPH , self . jpwl_pprot_tileno , self . jpwl_pprot_packno , self . jpwl_pprot , self . jpwl_sens_size , self . jpwl_sens_addr , self . jpwl_sens_range , self . jpwl_sens_MH , self . jpwl_sens_TPH_tileno , self . jpwl_sens_TPH , self . cp_cinema , self . max_comp_size , self . cp_rsiz , self . tp_on , self . tp_flag , self . tcp_mct , self . jpip_on , self . mct_data , self . max_cs_size , self . rsiz )
+    }
+}
 pub type opj_cparameters_t = opj_cparameters;
 #[doc = " Decompression parameters"]
 #[repr(C)]
@@ -2248,6 +2291,11 @@ fn bindgen_test_layout_opj_dparameters() {
         8248usize,
         concat!("Offset of field: ", stringify!(opj_dparameters), "::", stringify!(flags))
     );
+}
+impl ::std::fmt::Debug for opj_dparameters {
+    fn fmt(&self, f: &mut ::std::fmt::Formatter<'_>) -> ::std::fmt::Result {
+        write ! ( f , "opj_dparameters {{ cp_reduce: {:?}, cp_layer: {:?}, infile: [{}], outfile: [{}], decod_format: {:?}, cod_format: {:?}, DA_x0: {:?}, DA_x1: {:?}, DA_y0: {:?}, DA_y1: {:?}, m_verbose: {:?}, tile_index: {:?}, nb_tile_to_decode: {:?}, jpwl_correct: {:?}, jpwl_exp_comps: {:?}, jpwl_max_tiles: {:?}, flags: {:?} }}" , self . cp_reduce , self . cp_layer , self . infile . iter ( ) . enumerate ( ) . map ( | ( i , v ) | format ! ( "{}{:?}" , if i > 0 { ", " } else { "" } , v ) ) . collect :: < String > ( ) , self . outfile . iter ( ) . enumerate ( ) . map ( | ( i , v ) | format ! ( "{}{:?}" , if i > 0 { ", " } else { "" } , v ) ) . collect :: < String > ( ) , self . decod_format , self . cod_format , self . DA_x0 , self . DA_x1 , self . DA_y0 , self . DA_y1 , self . m_verbose , self . tile_index , self . nb_tile_to_decode , self . jpwl_correct , self . jpwl_exp_comps , self . jpwl_max_tiles , self . flags )
+    }
 }
 pub type opj_dparameters_t = opj_dparameters;
 #[doc = " JPEG2000 codec V2."]
@@ -2833,6 +2881,11 @@ fn bindgen_test_layout_opj_tile_info() {
         concat!("Offset of field: ", stringify!(opj_tile_info), "::", stringify!(tp))
     );
 }
+impl ::std::fmt::Debug for opj_tile_info {
+    fn fmt(&self, f: &mut ::std::fmt::Formatter<'_>) -> ::std::fmt::Result {
+        write ! ( f , "opj_tile_info {{ thresh: {:?}, tileno: {:?}, start_pos: {:?}, end_header: {:?}, end_pos: {:?}, pw: [{}], ph: [{}], pdx: [{}], pdy: [{}], packet: {:?}, numpix: {:?}, distotile: {:?}, marknum: {:?}, marker: {:?}, maxmarknum: {:?}, num_tps: {:?}, tp: {:?} }}" , self . thresh , self . tileno , self . start_pos , self . end_header , self . end_pos , self . pw . iter ( ) . enumerate ( ) . map ( | ( i , v ) | format ! ( "{}{:?}" , if i > 0 { ", " } else { "" } , v ) ) . collect :: < String > ( ) , self . ph . iter ( ) . enumerate ( ) . map ( | ( i , v ) | format ! ( "{}{:?}" , if i > 0 { ", " } else { "" } , v ) ) . collect :: < String > ( ) , self . pdx . iter ( ) . enumerate ( ) . map ( | ( i , v ) | format ! ( "{}{:?}" , if i > 0 { ", " } else { "" } , v ) ) . collect :: < String > ( ) , self . pdy . iter ( ) . enumerate ( ) . map ( | ( i , v ) | format ! ( "{}{:?}" , if i > 0 { ", " } else { "" } , v ) ) . collect :: < String > ( ) , self . packet , self . numpix , self . distotile , self . marknum , self . marker , self . maxmarknum , self . num_tps , self . tp )
+    }
+}
 pub type opj_tile_info_t = opj_tile_info;
 #[doc = " Index structure of the codestream"]
 #[repr(C)]
@@ -3151,6 +3204,11 @@ fn bindgen_test_layout_opj_tccp_info() {
         948usize,
         concat!("Offset of field: ", stringify!(opj_tccp_info), "::", stringify!(prch))
     );
+}
+impl ::std::fmt::Debug for opj_tccp_info {
+    fn fmt(&self, f: &mut ::std::fmt::Formatter<'_>) -> ::std::fmt::Result {
+        write ! ( f , "opj_tccp_info {{ compno: {:?}, csty: {:?}, numresolutions: {:?}, cblkw: {:?}, cblkh: {:?}, cblksty: {:?}, qmfbid: {:?}, qntsty: {:?}, stepsizes_mant: [{}], stepsizes_expn: [{}], numgbits: {:?}, roishift: {:?}, prcw: [{}], prch: [{}] }}" , self . compno , self . csty , self . numresolutions , self . cblkw , self . cblkh , self . cblksty , self . qmfbid , self . qntsty , self . stepsizes_mant . iter ( ) . enumerate ( ) . map ( | ( i , v ) | format ! ( "{}{:?}" , if i > 0 { ", " } else { "" } , v ) ) . collect :: < String > ( ) , self . stepsizes_expn . iter ( ) . enumerate ( ) . map ( | ( i , v ) | format ! ( "{}{:?}" , if i > 0 { ", " } else { "" } , v ) ) . collect :: < String > ( ) , self . numgbits , self . roishift , self . prcw . iter ( ) . enumerate ( ) . map ( | ( i , v ) | format ! ( "{}{:?}" , if i > 0 { ", " } else { "" } , v ) ) . collect :: < String > ( ) , self . prch . iter ( ) . enumerate ( ) . map ( | ( i , v ) | format ! ( "{}{:?}" , if i > 0 { ", " } else { "" } , v ) ) . collect :: < String > ( ) )
+    }
 }
 pub type opj_tccp_info_t = opj_tccp_info;
 #[doc = " Tile coding parameters information"]
