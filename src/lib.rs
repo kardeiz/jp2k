@@ -88,6 +88,11 @@ pub mod err {
     pub type Result<T> = std::result::Result<T, Error>;
 }
 
+#[cfg(feature = "docs-rs")]
+#[path = "ffi.ref.rs"]
+mod ffi;
+
+#[cfg(not(feature = "docs-rs"))]
 mod ffi;
 
 use std::ffi::CString;

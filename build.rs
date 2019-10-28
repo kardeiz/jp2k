@@ -3,6 +3,10 @@ extern crate bindgen;
 use std::env;
 use std::path::PathBuf;
 
+#[cfg(feature = "docs-rs")]
+fn main() {}
+
+#[cfg(not(feature = "docs-rs"))]
 fn main() {
     println!("cargo:rerun-if-changed=build.rs");
 

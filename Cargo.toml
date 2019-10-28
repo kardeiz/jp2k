@@ -1,6 +1,6 @@
 [package]
 name = "jp2k"
-version = "0.3.0"
+version = "0.3.1"
 authors = ["Jacob Brown <kardeiz@gmail.com>", "Leo Schwarz <mail@leoschwarz.com>"]
 license = "MIT OR Apache-2.0"
 edition = "2018"
@@ -22,3 +22,10 @@ pkg-config = "0.3.16"
 rips = "0.2"
 stopwatch = "0.0.7"
 env_logger = "0.7.0"
+
+
+[features]
+docs-rs = []
+
+[package.metadata.docs.rs]
+features = ["docs-rs"]
