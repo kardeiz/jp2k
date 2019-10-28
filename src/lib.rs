@@ -103,26 +103,10 @@ pub use ffi::{
 struct InnerDecodeParams(ffi::opj_dparameters);
 
 impl Default for InnerDecodeParams {
-    fn default() -> Self {
-        Self(ffi::opj_dparameters_t {
-            cp_reduce: 0,
-            cp_layer: 0,
-            infile: [0; 4096],
-            outfile: [0; 4096],
-            decod_format: 0,
-            cod_format: 0,
-            DA_x0: 0,
-            DA_x1: 0,
-            DA_y0: 0,
-            DA_y1: 0,
-            m_verbose: 0,
-            tile_index: 0,
-            nb_tile_to_decode: 0,
-            jpwl_correct: 0,
-            jpwl_exp_comps: 0,
-            jpwl_max_tiles: 0,
-            flags: 0,
-        })
+    fn default() -> Self {        
+        let mut new = unsafe { std::mem::zeroed::<ffi::opj_dparameters>() };
+        unsafe { ffi::opj_set_default_decoder_parameters(&mut new as *mut _); }
+        InnerDecodeParams(new)
     }
 }
 
@@ -158,7 +142,6 @@ impl DecodeParams {
         self
     }
 
-    /// Image will be "cropped" to the specified decoding area, with width = x1 - x0 and height y1 - y0
     pub fn with_num_threads(mut self, num: i32) -> Self {
         self.num_threads = Some(num);
         self
@@ -215,7 +198,7 @@ impl Stream {
         }
 
         unsafe extern "C" fn opj_stream_free_user_data_fn(p_user_data: *mut c_void) {
-            drop(Box::from_raw(p_user_data as *mut SliceWithOffset))
+                        drop(Box::from_raw(p_user_data as *mut SliceWithOffset))
         }
 
         unsafe extern "C" fn opj_stream_read_fn(
@@ -258,6 +241,7 @@ impl Stream {
             jp2_stream
         };
 
+        
         Ok(Stream(ptr))
     }
 
@@ -393,13 +377,14 @@ impl ImageBuffer {
                 return Err(err::Error::boxed("Could not set specified threads."));
             }
         }
-
+        
         let mut img = Image::new();
 
         if unsafe { ffi::opj_read_header(stream.0, codec.0.as_ptr(), &mut img.0) } != 1 {
             return Err(err::Error::boxed("Failed to read header."));
         }
 
+        
         if let Some(DecodingArea { x0, y0, x1, y1 }) = params.decoding_area {
             if unsafe { ffi::opj_set_decode_area(codec.0.as_ptr(), img.0, x0, y0, x1, y1) } != 1 {
                 return Err(err::Error::boxed("Setting up the decoding area failed."));
@@ -409,6 +394,14 @@ impl ImageBuffer {
         if unsafe { ffi::opj_decode(codec.0.as_ptr(), stream.0, img.0) } != 1 {
             return Err(err::Error::boxed("Failed to read image."));
         }
+        
+        
+        // if unsafe { ffi::opj_end_decompress(codec.0.as_ptr(), stream.0) } != 1 {
+        //     return Err(err::Error::boxed("Ending decoding failed."));
+        // }
+
+        drop(codec);
+        drop(stream);
 
         let width = img.width();
         let height = img.height();
@@ -420,7 +413,14 @@ impl ImageBuffer {
         let num_bands;
 
         let buffer = unsafe {
+
             match img.components() {
+
+                &[comp_r] => {
+                    num_bands = 1;
+                    std::slice::from_raw_parts(comp_r.data, (width * height) as usize).into_iter().map(|x| *x as u8).collect::<Vec<_>>()
+                },
+
                 &[comp_r, comp_g, comp_b] => {
                     let r = std::slice::from_raw_parts(comp_r.data, (width * height) as usize);
                     let g = std::slice::from_raw_parts(comp_g.data, (width * height) as usize);
@@ -470,8 +470,19 @@ impl ImageBuffer {
 }
 
 
+pub struct Elapsed<'a>(std::time::Instant, &'a str);
 
+impl<'a> Elapsed<'a> {
+    pub fn new(msg: &'a str) -> Self {
+        Elapsed(std::time::Instant::now(), msg)        
+    }
+}
 
+impl<'a> Drop for Elapsed<'a> {
+    fn drop(&mut self) {
+        println!("\"{}\" at {:?}", self.1, self.0.elapsed());
+    }
+} 
 
 
 

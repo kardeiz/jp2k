@@ -12,12 +12,13 @@ repository = "https://github.com/kardeiz/jp2k"
 
 [dependencies]
 libc = "0.2"
-stopwatch = "0.0.7"
 
 [build-dependencies]
 bindgen = "0.51"
-cmake = "0.1.42"
-cc = "1.0"
+pkg-config = "0.3.16"
+
 
 [dev-dependencies]
 rips = "0.2"
+stopwatch = "0.0.7"
+env_logger = "0.7.0"

@@ -1,43 +1,25 @@
-// debugging instructions: run cargo with -vv to get all output.
-
 extern crate bindgen;
-extern crate cc;
-extern crate cmake;
 
 use std::env;
-use std::path::{Path, PathBuf};
-use std::process::Command;
-
-#[cfg(unix)]
-mod supported_platform {
-    pub fn check() {}
-}
+use std::path::PathBuf;
 
 fn main() {
-    supported_platform::check();
 
+    println!("cargo:rerun-if-changed=build.rs");
 
-    if !Path::new("libopenjpeg/.git").exists() {
-        let _ = Command::new("git").args(&["submodule", "update", "--init"]).status();
-    }
-
-    // Unset DESTDIR or libopenjp2.a ends up in it and cargo won't find it.
-    env::remove_var("DESTDIR");
-    let mut cfg = cmake::Config::new("libopenjpeg");
-    let dst = cfg.define("BUILD_SHARED_LIBS", "OFF").build();
-
-    println!("cargo:rustc-link-search=native={}/build/bin", dst.display());
-    println!("cargo:rustc-link-lib=static=openjp2");
-    
-    // if Path::new("src/ffi.ref.rs").exists() { return; }
+    let lib = pkg_config::probe_library("libopenjp2").expect("Could not find `libopenjp2`");
 
     let out_path = PathBuf::from(env::var("OUT_DIR").unwrap());
-    let include_dir = out_path.join("include/openjpeg-2.3");
 
-    let bindings = bindgen::Builder::default()
+    let mut builder = bindgen::Builder::default();
+
+    for path in &lib.include_paths {
+        builder = builder.clang_arg(format!("-I{}", path.display()));
+    }
+
+    let bindings = builder
         .header_contents("wrapper.h", "#include \"openjpeg.h\"")
         .clang_arg("-fno-inline-functions")
-        .clang_arg(format!("-I{}", include_dir.display()))
         .derive_debug(true)
         .impl_debug(true)
         .default_enum_style(bindgen::EnumVariation::Rust { non_exhaustive: false })
@@ -45,8 +27,8 @@ fn main() {
         .generate()
         .unwrap();
 
-    bindings.write_to_file("src/ffi.ref.rs").unwrap();
+    // bindings.write_to_file("src/ffi.ref.rs").unwrap();
 
-    // Write bindings to $OUT_DIR/bindings.rs
     bindings.write_to_file(out_path.join("bindings.rs")).unwrap();
+
 }

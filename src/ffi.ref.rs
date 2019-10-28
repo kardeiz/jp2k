@@ -5,7 +5,7 @@ pub const OPJ_FALSE: u32 = 0;
 pub const OPJ_HAVE_STDINT_H: u32 = 1;
 pub const OPJ_VERSION_MAJOR: u32 = 2;
 pub const OPJ_VERSION_MINOR: u32 = 3;
-pub const OPJ_VERSION_BUILD: u32 = 1;
+pub const OPJ_VERSION_BUILD: u32 = 0;
 pub const _STDINT_H: u32 = 1;
 pub const _FEATURES_H: u32 = 1;
 pub const _DEFAULT_SOURCE: u32 = 1;
@@ -1393,7 +1393,7 @@ pub struct opj_poc {
     pub prg: OPJ_PROG_ORDER,
     #[doc = " Progression order string"]
     pub progorder: [OPJ_CHAR; 5usize],
-    #[doc = " Tile number (starting at 1)"]
+    #[doc = " Tile number"]
     pub tile: OPJ_UINT32,
     #[doc = " Start and end values for Tile width and height"]
     pub tx0: OPJ_INT32,
@@ -2175,7 +2175,7 @@ pub struct opj_dparameters {
     pub DA_y1: OPJ_UINT32,
     #[doc = " Verbose mode"]
     pub m_verbose: OPJ_BOOL,
-    #[doc = " tile number of the decoded tile"]
+    #[doc = " tile number ot the decoded tile"]
     pub tile_index: OPJ_UINT32,
     #[doc = " Nb of tile to decode"]
     pub nb_tile_to_decode: OPJ_UINT32,
@@ -3768,8 +3768,7 @@ extern "C" {
     );
 }
 extern "C" {
-    #[doc = " Sets the given function to be used as a seek function, the stream is then seekable,"]
-    #[doc = " using SEEK_SET behavior."]
+    #[doc = " Sets the given function to be used as a seek function, the stream is then seekable."]
     #[doc = " @param       p_stream    the stream to modify"]
     #[doc = " @param       p_function  the function to use a skip function."]
     pub fn opj_stream_set_seek_function(
@@ -3894,9 +3893,6 @@ extern "C" {
     #[doc = " number, or \"ALL_CPUS\". If OPJ_NUM_THREADS is set and this function is called,"]
     #[doc = " this function will override the behaviour of the environment variable."]
     #[doc = ""]
-    #[doc = " Currently this function must be called after opj_setup_decoder() and"]
-    #[doc = " before opj_read_header()."]
-    #[doc = ""]
     #[doc = " Note: currently only has effect on the decompressor."]
     #[doc = ""]
     #[doc = " @param p_codec       decompressor handler"]
@@ -3968,7 +3964,7 @@ extern "C" {
     #[doc = " performance improvements when reading an image by chunks."]
     #[doc = ""]
     #[doc = " @param   p_codec         the jpeg2000 codec."]
-    #[doc = " @param   p_image         the decoded image previously set by opj_read_header"]
+    #[doc = " @param   p_image         the decoded image previously setted by opj_read_header"]
     #[doc = " @param   p_start_x       the left position of the rectangle to decode (in image coordinates)."]
     #[doc = " @param   p_end_x         the right position of the rectangle to decode (in image coordinates)."]
     #[doc = " @param   p_start_y       the up position of the rectangle to decode (in image coordinates)."]
