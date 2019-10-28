@@ -4,7 +4,6 @@ use std::env;
 use std::path::PathBuf;
 
 fn main() {
-
     println!("cargo:rerun-if-changed=build.rs");
 
     let lib = pkg_config::probe_library("libopenjp2").expect("Could not find `libopenjp2`");
@@ -30,5 +29,4 @@ fn main() {
     // bindings.write_to_file("src/ffi.ref.rs").unwrap();
 
     bindings.write_to_file(out_path.join("bindings.rs")).unwrap();
-
 }
